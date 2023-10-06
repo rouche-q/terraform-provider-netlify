@@ -1,85 +1,132 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 import (
 	"context"
-	"net/http"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Ensure ScaffoldingProvider satisfies various provider interfaces.
-var _ provider.Provider = &ScaffoldingProvider{}
+// Ensure the implementation satisfies the expected interfaces.
+var (
+	_ provider.Provider = &netlifyProvider{}
+)
 
-// ScaffoldingProvider defines the provider implementation.
-type ScaffoldingProvider struct {
+// New is a helper function to simplify provider server and testing implementation.
+func New(version string) func() provider.Provider {
+	return func() provider.Provider {
+		return &netlifyProvider{
+			version: version,
+		}
+	}
+}
+
+// netlifyProvider is the provider implementation.
+type netlifyProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
 }
 
-// ScaffoldingProviderModel describes the provider data model.
-type ScaffoldingProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
-}
-
-func (p *ScaffoldingProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "scaffolding"
+// Metadata returns the provider type name.
+func (p *netlifyProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "netlify"
 	resp.Version = p.version
 }
 
-func (p *ScaffoldingProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "Example provider attribute",
-				Optional:            true,
-			},
-		},
-	}
+type netlifyProviderModel struct {
+	Personal_token types.String `tfsdk:"personal_token"`
 }
 
-func (p *ScaffoldingProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data ScaffoldingProviderModel
+// Schema defines the provider-level schema for configuration data.
+func (p *netlifyProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"personal_token": schema.StringAttribute{
+				Optional: true,
+			},
+		}}
+}
 
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+// Configure prepares a Netlify API client for data sources and resources.
+func (p *netlifyProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var config netlifyProviderModel
+	diags := req.Config.Get(ctx, &config)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if config.Personal_token.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("personal_token"),
+			"Unknown Netlify API personalToken",
+			"The provider cannot create the Netlify API client as there is an unknown configuration value for the HashiCups API personalToken. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the NETLIFY_PERSONAL_TOKEN environment variable.",
+		)
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
+	// Default values to environment variables, but override
+	// with Terraform configuration value if set.
 
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
-	resp.DataSourceData = client
-	resp.ResourceData = client
-}
+	personalToken := os.Getenv("NETLIFY_PERSONAL_TOKEN")
 
-func (p *ScaffoldingProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		NewExampleResource,
+	if !config.Personal_token.IsNull() {
+		personalToken = config.Personal_token.ValueString()
 	}
+
+	// If any of the expected configurations are missing, return
+	// errors with provider-specific guidance.
+
+	if personalToken == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("personalToken"),
+			"Missing Netlify API Personal token",
+			"The provider cannot create the Netlify API client as there is a missing or empty value for the HashiCups API personalToken. "+
+				"Set the personalToken value in the configuration or use the NETLIFY_PERSONAL_TOKEN environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	netlify, err := NewNetlifyClient("https://api.netlify.com/api/v1/", personalToken)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Create Netlify API Client",
+			"An unexpected error occurred when creating the Netlify API client. "+
+				"If the error is not clear, please contact the provider developers.\n\n"+
+				"Error: "+err.Error(),
+		)
+		return
+	}
+
+	// Make the Netlify client available during DataSource and Resource
+	// type Configure methods.
+	resp.DataSourceData = netlify
+	resp.ResourceData = netlify
 }
 
-func (p *ScaffoldingProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+// DataSources defines the data sources implemented in the provider.
+func (p *netlifyProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewExampleDataSource,
+		NewSiteDataSource,
 	}
 }
 
-func New(version string) func() provider.Provider {
-	return func() provider.Provider {
-		return &ScaffoldingProvider{
-			version: version,
-		}
-	}
+// Resources defines the resources implemented in the provider.
+func (p *netlifyProvider) Resources(_ context.Context) []func() resource.Resource {
+	return nil
 }
