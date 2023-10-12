@@ -49,7 +49,8 @@ func (p *netlifyProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"personal_token": schema.StringAttribute{
-				Optional: true,
+				Description: "Netlify personal token for the Netlify API. May aslo be provided via NETLIFY_PERSONAL_TOKEN env variable",
+				Optional:    true,
 			},
 		}}
 }
@@ -128,5 +129,8 @@ func (p *netlifyProvider) DataSources(_ context.Context) []func() datasource.Dat
 
 // Resources defines the resources implemented in the provider.
 func (p *netlifyProvider) Resources(_ context.Context) []func() resource.Resource {
-	return nil
+	return []func() resource.Resource{
+		NewSiteResource,
+		NewDeployKeyResource,
+	}
 }

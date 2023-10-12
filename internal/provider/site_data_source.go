@@ -15,9 +15,13 @@ type siteDataSource struct {
 }
 
 type siteDataSourceModel struct {
-	Name         types.String `tfsdk:"name"`
-	CustomDomain types.String `tfsdk:"custom_domain"`
 	Id           types.String `tfsdk:"id"`
+	CustomDomain types.String `tfsdk:"custom_domain"`
+	Name         types.String `tfsdk:"name"`
+	Url          types.String `tfsdk:"url"`
+	CreatedAt    types.String `tfsdk:"created_at"`
+	UpdatedAt    types.String `tfsdk:"updated_at"`
+	State        types.String `tfsdk:"state"`
 }
 
 var (
@@ -62,6 +66,18 @@ func (d *siteDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			"id": schema.StringAttribute{
 				Required: true,
 			},
+			"url": schema.StringAttribute{
+				Computed: true,
+			},
+			"state": schema.StringAttribute{
+				Computed: true,
+			},
+			"created_at": schema.StringAttribute{
+				Computed: true,
+			},
+			"updated_at": schema.StringAttribute{
+				Computed: true,
+			},
 		},
 	}
 }
@@ -72,6 +88,9 @@ func (d *siteDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	diag := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diag...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	site, err := d.client.GetSite(data.Id.ValueString())
 	if err != nil {
@@ -82,8 +101,14 @@ func (d *siteDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
+	data.Id = types.StringValue(site.Id)
 	data.Name = types.StringValue(site.Name)
 	data.CustomDomain = types.StringValue(site.CustomDomain)
+	data.Url = types.StringValue(site.Url)
+	data.State = types.StringValue(site.State)
+	data.CreatedAt = types.StringValue(site.CreatedAt)
+	data.UpdatedAt = types.StringValue(site.UpdatedAt)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
