@@ -44,7 +44,7 @@ func (r *DeployKeyResource) Metadata(ctx context.Context, req resource.MetadataR
 func (r *DeployKeyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "DeployKey resource",
+		MarkdownDescription: "Deploy key resource",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

@@ -1,13 +1,12 @@
 terraform {
   required_providers {
     netlify = {
-      source = "registry.terraform.io/rouche-q/netlify"
+      source = "rouche-q/netlify"
     }
   }
 }
 
-provider "netlify" {
-}
+provider "netlify" {}
 
 data "netlify_site" "test" {
   id = "NETLIFY_SITE_ID"

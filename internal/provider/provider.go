@@ -124,6 +124,7 @@ func (p *netlifyProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *netlifyProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewSiteDataSource,
+		NewCurrentUserDataSource,
 	}
 }
 

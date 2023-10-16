@@ -10,11 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-type siteDataSource struct {
+type SiteDataSource struct {
 	client *NetlifyClient
 }
 
-type siteDataSourceModel struct {
+type SiteDataSourceModel struct {
 	Id           types.String `tfsdk:"id"`
 	CustomDomain types.String `tfsdk:"custom_domain"`
 	Name         types.String `tfsdk:"name"`
@@ -25,19 +25,19 @@ type siteDataSourceModel struct {
 }
 
 var (
-	_ datasource.DataSource              = &siteDataSource{}
-	_ datasource.DataSourceWithConfigure = &siteDataSource{}
+	_ datasource.DataSource              = &SiteDataSource{}
+	_ datasource.DataSourceWithConfigure = &SiteDataSource{}
 )
 
 func NewSiteDataSource() datasource.DataSource {
-	return &siteDataSource{}
+	return &SiteDataSource{}
 }
 
-func (d *siteDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *SiteDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_site"
 }
 
-func (d *siteDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SiteDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -54,8 +54,9 @@ func (d *siteDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 	d.client = client
 }
 
-func (d *siteDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *SiteDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		MarkdownDescription: "Site Datasource",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Computed: true,
@@ -82,9 +83,9 @@ func (d *siteDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 	}
 }
 
-func (d *siteDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data siteDataSourceModel
-	tflog.Debug(ctx, "Preparing to read site data source")
+func (d *SiteDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data SiteDataSourceModel
+	tflog.Debug(ctx, "Preparing to read Site data source")
 
 	diag := req.Config.Get(ctx, &data)
 	resp.Diagnostics.Append(diag...)
@@ -95,7 +96,7 @@ func (d *siteDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	site, err := d.client.GetSite(data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Netlify site",
+			"Unable to Read Netlify Site",
 			err.Error(),
 		)
 		return

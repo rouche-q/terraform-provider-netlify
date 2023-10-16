@@ -29,7 +29,7 @@ type SiteResource struct {
 }
 
 // SiteResourceModel describes the resource data model.
-type siteResourceModel struct {
+type SiteResourceModel struct {
 	Id           types.String    `tfsdk:"id"`
 	CustomDomain types.String    `tfsdk:"custom_domain"`
 	Name         types.String    `tfsdk:"name"`
@@ -133,7 +133,7 @@ func (r *SiteResource) Configure(ctx context.Context, req resource.ConfigureRequ
 }
 
 func (r *SiteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data siteResourceModel
+	var data SiteResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -157,7 +157,7 @@ func (r *SiteResource) Create(ctx context.Context, req resource.CreateRequest, r
 	site, err := r.client.CreateSite(netlifyRepo)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Netlify site",
+			"Unable to Create Netlify Site",
 			err.Error(),
 		)
 		return
@@ -178,7 +178,7 @@ func (r *SiteResource) Create(ctx context.Context, req resource.CreateRequest, r
 }
 
 func (r *SiteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data siteResourceModel
+	var data SiteResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -189,7 +189,7 @@ func (r *SiteResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	site, err := r.client.GetSite(data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Netlify site",
+			"Unable to Read Netlify Site",
 			err.Error(),
 		)
 		return
@@ -211,7 +211,7 @@ func (r *SiteResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 }
 
 func (r *SiteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data siteResourceModel
+	var data SiteResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -236,7 +236,7 @@ func (r *SiteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	site, err := r.client.UpdateSite(data.Id.ValueString(), netlifyRepo)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Netlify site",
+			"Unable to Update Netlify Site",
 			err.Error(),
 		)
 		return
@@ -258,7 +258,7 @@ func (r *SiteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 }
 
 func (r *SiteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data siteResourceModel
+	var data SiteResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)

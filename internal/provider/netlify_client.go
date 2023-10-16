@@ -50,6 +50,18 @@ type DeployKey struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type CurrentUser struct {
+	Id          string `json:"id"`
+	Uid         string `json:"uid"`
+	FullName    string `json:"full_name"`
+	AvatarUrl   string `json:"avatar_url"`
+	Email       string `json:"email"`
+	AffiliateId string `json:"affiliate_id"`
+	SiteCount   int    `json:"site_count"`
+	CreatedAt   string `json:"created_at"`
+	LastLogin   string `json:"last_login"`
+}
+
 func (n NetlifyTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Set("Authorization", "Bearer "+n.Token)
 	req.Header.Set("Content-Type", "application/json")
@@ -165,6 +177,18 @@ func (c *NetlifyClient) GetDeployKey(keyId string) (*DeployKey, error) {
 
 func (c *NetlifyClient) DeleteDeployKey(keyId string) error {
 	return c.Do(http.MethodDelete, "deploy_keys/"+keyId, &bytes.Buffer{}, nil)
+}
+
+// Current User function
+
+func (c *NetlifyClient) GetCurrentUser() (*CurrentUser, error) {
+	var currentUser CurrentUser
+	err := c.Do(http.MethodGet, "/user", &bytes.Buffer{}, &currentUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return &currentUser, nil
 }
 
 // Create NetlifyClient
