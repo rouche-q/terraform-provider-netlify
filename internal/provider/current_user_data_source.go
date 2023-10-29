@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-netlify/internal/netlify"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -11,7 +12,7 @@ import (
 )
 
 type CurrentUserDataSource struct {
-	client *NetlifyClient
+	client *netlify.NetlifyClient
 }
 
 type CurrentUserDataSourceModel struct {
@@ -44,7 +45,7 @@ func (d *CurrentUserDataSource) Configure(_ context.Context, req datasource.Conf
 		return
 	}
 
-	client, ok := req.ProviderData.(*NetlifyClient)
+	client, ok := req.ProviderData.(*netlify.NetlifyClient)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",

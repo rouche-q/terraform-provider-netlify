@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"terraform-provider-netlify/internal/netlify"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -25,7 +26,7 @@ func NewSiteResource() resource.Resource {
 
 // SiteResource defines the resource implementation.
 type SiteResource struct {
-	client *NetlifyClient
+	client *netlify.NetlifyClient
 }
 
 // SiteResourceModel describes the resource data model.
@@ -118,7 +119,7 @@ func (r *SiteResource) Configure(ctx context.Context, req resource.ConfigureRequ
 		return
 	}
 
-	client, ok := req.ProviderData.(*NetlifyClient)
+	client, ok := req.ProviderData.(*netlify.NetlifyClient)
 
 	if !ok {
 		resp.Diagnostics.AddError(
@@ -142,10 +143,10 @@ func (r *SiteResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	tfRepo := data.Repository
-	netlifyRepo := SiteRequest{
+	netlifyRepo := netlify.SiteRequest{
 		Name:         data.Name.ValueString(),
 		CustomDomain: data.Name.ValueString(),
-		Repo: Repository{
+		Repo: netlify.Repository{
 			Provider:    tfRepo.Provider.ValueString(),
 			Path:        tfRepo.RepoPath.ValueString(),
 			Branch:      tfRepo.RepoBranch.ValueString(),
@@ -220,10 +221,10 @@ func (r *SiteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	tfRepo := data.Repository
-	netlifyRepo := SiteRequest{
+	netlifyRepo := netlify.SiteRequest{
 		Name:         data.Name.ValueString(),
 		CustomDomain: data.Name.ValueString(),
-		Repo: Repository{
+		Repo: netlify.Repository{
 			Provider:    tfRepo.Provider.ValueString(),
 			Path:        tfRepo.RepoPath.ValueString(),
 			Branch:      tfRepo.RepoBranch.ValueString(),

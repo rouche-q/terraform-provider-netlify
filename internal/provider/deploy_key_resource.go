@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-netlify/internal/netlify"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -26,7 +27,7 @@ func NewDeployKeyResource() resource.Resource {
 
 // DeployKeyResource defines the resource implementation.
 type DeployKeyResource struct {
-	client *NetlifyClient
+	client *netlify.NetlifyClient
 }
 
 // DeployKeyResourceModel describes the resource data model.
@@ -72,7 +73,7 @@ func (r *DeployKeyResource) Configure(ctx context.Context, req resource.Configur
 		return
 	}
 
-	client, ok := req.ProviderData.(*NetlifyClient)
+	client, ok := req.ProviderData.(*netlify.NetlifyClient)
 
 	if !ok {
 		resp.Diagnostics.AddError(

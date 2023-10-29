@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"terraform-provider-netlify/internal/netlify"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -103,7 +104,7 @@ func (p *netlifyProvider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
-	netlify, err := NewNetlifyClient("https://api.netlify.com/api/v1/", personalToken)
+	client, err := netlify.NewNetlifyClient("https://api.netlify.com/api/v1/", personalToken)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create Netlify API Client",
@@ -116,8 +117,8 @@ func (p *netlifyProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	// Make the Netlify client available during DataSource and Resource
 	// type Configure methods.
-	resp.DataSourceData = netlify
-	resp.ResourceData = netlify
+	resp.DataSourceData = client
+	resp.ResourceData = client
 }
 
 // DataSources defines the data sources implemented in the provider.
