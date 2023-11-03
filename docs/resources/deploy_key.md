@@ -16,7 +16,7 @@ Deploy key resource
 terraform {
   required_providers {
     netlify = {
-      source = "registry.terraform.io/rouche-q/netlify"
+      source = "rouche-q/netlify"
     }
   }
 }
