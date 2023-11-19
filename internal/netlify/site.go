@@ -39,7 +39,7 @@ func (c *NetlifyClient) CreateSite(req SiteRequest) (*Site, error) {
 	}
 
 	reqDo := Request{
-		Method: http.MethodGet,
+		Method: http.MethodPost,
 		Path:   "sites/",
 		Body:   bytes.NewBuffer(jsonValue),
 	}

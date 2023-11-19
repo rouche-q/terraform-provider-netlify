@@ -6,19 +6,21 @@ package provider
 import (
 	"context"
 	"fmt"
+	"terraform-provider-netlify/internal/netlify"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-netlify/internal/netlify"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &SiteResource{}
-var _ resource.ResourceWithImportState = &SiteResource{}
-var _ resource.ResourceWithConfigure = &SiteResource{}
+var (
+	_ resource.Resource                = &SiteResource{}
+	_ resource.ResourceWithImportState = &SiteResource{}
+	_ resource.ResourceWithConfigure   = &SiteResource{}
+)
 
 func NewSiteResource() resource.Resource {
 	return &SiteResource{}
@@ -66,6 +68,7 @@ func (r *SiteResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Computed: true,
 			},
 			"custom_domain": schema.StringAttribute{
+				Computed: true,
 				Optional: true,
 			},
 			"id": schema.StringAttribute{
@@ -145,7 +148,7 @@ func (r *SiteResource) Create(ctx context.Context, req resource.CreateRequest, r
 	tfRepo := data.Repository
 	netlifyRepo := netlify.SiteRequest{
 		Name:         data.Name.ValueString(),
-		CustomDomain: data.Name.ValueString(),
+		CustomDomain: data.CustomDomain.ValueString(),
 		Repo: netlify.Repository{
 			Provider:    tfRepo.Provider.ValueString(),
 			Path:        tfRepo.RepoPath.ValueString(),
@@ -208,7 +211,6 @@ func (r *SiteResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 }
 
 func (r *SiteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -261,7 +263,6 @@ func (r *SiteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 func (r *SiteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data SiteResourceModel
 
-	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

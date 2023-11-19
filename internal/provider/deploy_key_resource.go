@@ -105,6 +105,7 @@ func (r *DeployKeyResource) Create(ctx context.Context, req resource.CreateReque
 	data.Id = types.StringValue(deployKey.Id)
 	data.Key = types.StringValue(deployKey.Key)
 	data.CreatedAt = types.StringValue(deployKey.CreatedAt)
+	data.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	if resp.Diagnostics.HasError() {

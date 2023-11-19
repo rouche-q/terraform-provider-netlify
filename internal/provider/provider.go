@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"os"
+	"terraform-provider-netlify/internal/netlify"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -10,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-netlify/internal/netlify"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -53,7 +53,8 @@ func (p *netlifyProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 				Description: "Netlify personal token for the Netlify API. May aslo be provided via NETLIFY_PERSONAL_TOKEN env variable",
 				Optional:    true,
 			},
-		}}
+		},
+	}
 }
 
 // Configure prepares a Netlify API client for data sources and resources.

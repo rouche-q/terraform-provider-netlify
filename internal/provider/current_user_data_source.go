@@ -68,7 +68,7 @@ func (d *CurrentUserDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Computed: true,
 			},
 			"full_name": schema.StringAttribute{
-				Required: true,
+				Computed: true,
 			},
 			"avatar_url": schema.StringAttribute{
 				Computed: true,
