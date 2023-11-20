@@ -64,8 +64,8 @@ func (r *SiteResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Optional: true,
 				Computed: true,
+				Optional: true,
 			},
 			"custom_domain": schema.StringAttribute{
 				Computed: true,
@@ -190,7 +190,8 @@ func (r *SiteResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	site, err := r.client.GetSite(data.Id.ValueString())
+	siteId := data.Id.ValueString()
+	site, err := r.client.GetSite(siteId)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Netlify Site",
@@ -225,7 +226,7 @@ func (r *SiteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	tfRepo := data.Repository
 	netlifyRepo := netlify.SiteRequest{
 		Name:         data.Name.ValueString(),
-		CustomDomain: data.Name.ValueString(),
+		CustomDomain: data.CustomDomain.ValueString(),
 		Repo: netlify.Repository{
 			Provider:    tfRepo.Provider.ValueString(),
 			Path:        tfRepo.RepoPath.ValueString(),
@@ -236,7 +237,13 @@ func (r *SiteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		},
 	}
 
-	site, err := r.client.UpdateSite(data.Id.ValueString(), netlifyRepo)
+	var siteId string
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("id"), &siteId)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	site, err := r.client.UpdateSite(siteId, netlifyRepo)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Update Netlify Site",

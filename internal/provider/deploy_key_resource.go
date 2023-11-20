@@ -17,9 +17,11 @@ import (
 
 // Ensure provider defined types fully satisfy framework interfaces.
 
-var _ resource.Resource = &DeployKeyResource{}
-var _ resource.ResourceWithImportState = &DeployKeyResource{}
-var _ resource.ResourceWithConfigure = &DeployKeyResource{}
+var (
+	_ resource.Resource                = &DeployKeyResource{}
+	_ resource.ResourceWithImportState = &DeployKeyResource{}
+	_ resource.ResourceWithConfigure   = &DeployKeyResource{}
+)
 
 func NewDeployKeyResource() resource.Resource {
 	return &DeployKeyResource{}
@@ -146,7 +148,13 @@ func (r *DeployKeyResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	deployKey, err := r.client.GetDeployKey(data.Id.ValueString())
+	var keyId string
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("id"), &keyId)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	deployKey, err := r.client.GetDeployKey(keyId)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update deploy_key, got error: %s", err))
 		return
