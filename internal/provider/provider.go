@@ -135,5 +135,6 @@ func (p *netlifyProvider) Resources(_ context.Context) []func() resource.Resourc
 	return []func() resource.Resource{
 		NewSiteResource,
 		NewDeployKeyResource,
+		NewEnvVarRessource,
 	}
 }

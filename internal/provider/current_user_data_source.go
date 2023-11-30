@@ -18,6 +18,7 @@ type CurrentUserDataSource struct {
 type CurrentUserDataSourceModel struct {
 	Id          types.String `tfsdk:"id"`
 	Uid         types.String `tfsdk:"uid"`
+	Slug        types.String `tfsdk:"slug"`
 	FullName    types.String `tfsdk:"full_name"`
 	AvatarUrl   types.String `tfsdk:"avatar_url"`
 	Email       types.String `tfsdk:"email"`
@@ -67,6 +68,9 @@ func (d *CurrentUserDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 			"uid": schema.StringAttribute{
 				Computed: true,
 			},
+			"slug": schema.StringAttribute{
+				Computed: true,
+			},
 			"full_name": schema.StringAttribute{
 				Computed: true,
 			},
@@ -113,6 +117,7 @@ func (d *CurrentUserDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	data.Id = types.StringValue(currentUser.Email)
 	data.Uid = types.StringValue(currentUser.Uid)
+	data.Slug = types.StringValue(currentUser.Slug)
 	data.FullName = types.StringValue(currentUser.FullName)
 	data.AvatarUrl = types.StringValue(currentUser.AvatarUrl)
 	data.Email = types.StringValue(currentUser.Email)

@@ -3,7 +3,9 @@ package netlify
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -23,10 +25,14 @@ func (c *NetlifyClient) Do(req Request, dest any) error {
 
 	if len(req.Query) > 0 {
 		for key, value := range req.Query {
-			reqURL.Query().Add(key, value)
+			q := reqURL.Query()
+			q.Add(key, value)
+			reqURL.RawQuery = q.Encode()
 		}
 	}
 
+	log.Println(reqURL.String())
+	log.Println(req.Body.String())
 	httpReq, err := http.NewRequest(req.Method, reqURL.String(), req.Body)
 	if err != nil {
 		return err
@@ -38,6 +44,11 @@ func (c *NetlifyClient) Do(req Request, dest any) error {
 	}
 
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusNoContent {
+		resErr, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("invalid status code received %d : %s", res.StatusCode, resErr)
+	}
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {

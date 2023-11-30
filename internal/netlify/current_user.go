@@ -8,6 +8,7 @@ import (
 type CurrentUser struct {
 	Id          string `json:"id"`
 	Uid         string `json:"uid"`
+	Slug        string `json:"slug"`
 	FullName    string `json:"full_name"`
 	AvatarUrl   string `json:"avatar_url"`
 	Email       string `json:"email"`
